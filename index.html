@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Testing & Code Coverage Analysis — TI-UI · Chatbot · copilot-ui</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ai-blue: #1565c0;
+      --ai-dark: #0d1b2a;
+      --ai-accent: #00b4d8;
+      --ai-green: #2e7d32;
+      --ai-orange: #e65100;
+      --ai-red: #c62828;
+      --ai-yellow: #f9a825;
+      --ai-gray: #37474f;
+      --ai-light: #eceff1;
+      --slide-w: 960px;
+      --slide-h: 540px;
+      --slide-base-w: 960;
+      --slide-base-h: 540;
+    }
+
+    html, body { height: 100%; background: #1a1a2e; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+
+    /* ── Presentation container ───────────────────────────── */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .deck-shell {
+      width: 100%;
+      max-width: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .presentation {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+    }
+
+    /* ── Slide base ───────────────────────────────────────── */
+    .slide {
+      width: var(--slide-w);
+      min-height: var(--slide-h);
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+
+    .slide.is-active { display: flex; }
+
+    .slide-number {
+      position: absolute;
+      bottom: 14px;
+      right: 20px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+
+    /* ── Slide themes ─────────────────────────────────────── */
+    .theme-cover { background: linear-gradient(135deg, #0d1b2a 0%, #1565c0 60%, #00b4d8 100%); color: white; }
+    .theme-blue  { background: #f5f9ff; }
+    .theme-dark  { background: #0d1b2a; color: white; }
+    .theme-white { background: #ffffff; }
+    .theme-gradient-red { background: linear-gradient(135deg, #1a0a0a 0%, #c62828 100%); color: white; }
+    .theme-gradient-green { background: linear-gradient(135deg, #0a1a0a 0%, #1b5e20 100%); color: white; }
+
+    /* ── Header bands ─────────────────────────────────────── */
+    .slide-header {
+      padding: 26px 40px 18px;
+      border-bottom: 3px solid var(--ai-accent);
+    }
+    .theme-cover .slide-header, .theme-dark .slide-header, .theme-gradient-red .slide-header, .theme-gradient-green .slide-header { border-bottom-color: rgba(255,255,255,0.2); }
+    .slide-header .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; margin-bottom: 6px; }
+    .slide-header h1 { font-size: 30px; font-weight: 700; line-height: 1.2; }
+    .slide-header h2 { font-size: 22px; font-weight: 700; line-height: 1.2; }
+    .slide-header .subtitle { font-size: 14px; opacity: 0.75; margin-top: 4px; }
+
+    /* ── Body ─────────────────────────────────────────────── */
+    .slide-body { padding: 24px 40px; flex: 1; }
+    .slide-footer { padding: 12px 40px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; }
+    .theme-dark .slide-footer, .theme-gradient-red .slide-footer, .theme-gradient-green .slide-footer { border-top-color: rgba(255,255,255,0.1); }
+    .logo { font-size: 13px; font-weight: 700; color: var(--ai-accent); letter-spacing: 1px; }
+    .date { font-size: 11px; opacity: 0.5; }
+
+    /* ── Cover slide specifics ───────────────────────────── */
+    .cover-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 40px; gap: 16px; }
+    .cover-title { font-size: 38px; font-weight: 800; line-height: 1.1; }
+    .cover-subtitle { font-size: 18px; opacity: 0.8; max-width: 600px; }
+    .cover-meta { display: flex; gap: 30px; font-size: 13px; opacity: 0.65; margin-top: 10px; }
+    .cover-badge { display: inline-flex; gap: 12px; margin-top: 8px; }
+    .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 600; }
+
+    /* ── Tables ───────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: var(--ai-dark); color: white; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f8faff; }
+    .theme-dark table th { background: rgba(255,255,255,0.1); }
+    .theme-dark table td { border-bottom-color: rgba(255,255,255,0.08); color: white; }
+    .theme-dark tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
+
+    /* ── Status chips ─────────────────────────────────────── */
+    .chip { display: inline-block; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+    .chip-green { background: #e8f5e9; color: #1b5e20; }
+    .chip-yellow { background: #fff8e1; color: #f57f17; }
+    .chip-red { background: #ffebee; color: #b71c1c; }
+    .chip-blue { background: #e3f2fd; color: #0d47a1; }
+
+    /* ── Progress bars ────────────────────────────────────── */
+    .progress-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .progress-item { display: flex; align-items: center; gap: 10px; }
+    .progress-label { width: 180px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .progress-bar-outer { flex: 1; background: #e0e0e0; border-radius: 6px; height: 18px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 700; color: white; }
+    .bar-high { background: linear-gradient(90deg, #1b5e20, #43a047); }
+    .bar-medium { background: linear-gradient(90deg, #e65100, #fb8c00); }
+    .bar-low { background: linear-gradient(90deg, #b71c1c, #e53935); }
+    .bar-threshold { background: linear-gradient(90deg, #0d47a1, #1976d2); }
+    .progress-pct { width: 44px; font-size: 12px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+    /* ── Two-column layout ────────────────────────────────── */
+    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+    /* ── KPI cards ────────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .kpi-card { border-radius: 8px; padding: 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .kpi-card.green { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+    .kpi-card.yellow { background: #fff8e1; border-left: 4px solid #f9a825; }
+    .kpi-card.red { background: #ffebee; border-left: 4px solid #c62828; }
+    .kpi-card.blue { background: #e3f2fd; border-left: 4px solid #1565c0; }
+    .kpi-num { font-size: 28px; font-weight: 800; line-height: 1; }
+    .kpi-label { font-size: 11px; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-sub { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+    .kpi-card.green .kpi-num { color: #1b5e20; }
+    .kpi-card.yellow .kpi-num { color: #e65100; }
+    .kpi-card.red .kpi-num { color: #c62828; }
+    .kpi-card.blue .kpi-num { color: #1565c0; }
+
+    /* ── Section title separator ──────────────────────────── */
+    .section-tag { display: inline-block; background: var(--ai-blue); color: white; border-radius: 4px; padding: 2px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .section-tag.orange { background: #e65100; }
+    .section-tag.green { background: #2e7d32; }
+    .section-tag.red { background: #c62828; }
+    .section-tag.teal { background: #00695c; }
+
+    /* ── Timeline ─────────────────────────────────────────── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .tl-item { display: flex; gap: 14px; position: relative; }
+    .tl-item:not(:last-child)::before { content:''; position: absolute; left: 19px; top: 36px; bottom: 0; width: 2px; background: #bbdefb; }
+    .tl-dot { width: 40px; height: 40px; border-radius: 50%; background: var(--ai-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; z-index: 1; }
+    .tl-dot.orange { background: #e65100; }
+    .tl-dot.green { background: #2e7d32; }
+    .tl-dot.teal { background: #00695c; }
+    .tl-content { flex: 1; padding-bottom: 16px; }
+    .tl-content h4 { font-size: 14px; font-weight: 700; color: var(--ai-dark); margin-bottom: 3px; }
+    .tl-content p { font-size: 12px; color: #546e7a; line-height: 1.5; }
+    .tl-weeks { font-size: 11px; font-weight: 600; color: var(--ai-blue); }
+
+    /* ── Risk table colors ────────────────────────────────── */
+    .risk-critical { color: #b71c1c; font-weight: 700; }
+    .risk-high { color: #e65100; font-weight: 700; }
+    .risk-medium { color: #f57f17; font-weight: 700; }
+
+    /* ── Bullet lists ─────────────────────────────────────── */
+    ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    ul.bullets li { padding-left: 18px; position: relative; font-size: 13px; line-height: 1.5; }
+    ul.bullets li::before { content: '▸'; position: absolute; left: 0; color: var(--ai-accent); font-size: 11px; top: 2px; }
+    .theme-dark ul.bullets li { color: rgba(255,255,255,0.85); }
+    .theme-dark ul.bullets li::before { color: var(--ai-accent); }
+
+    /* ── Small helper text ────────────────────────────────── */
+    .caption { font-size: 11px; color: #78909c; margin-top: 10px; font-style: italic; }
+    .h3 { font-size: 15px; font-weight: 700; color: var(--ai-dark); margin-bottom: 8px; }
+    .theme-dark .h3 { color: white; }
+    .spacer { height: 14px; }
+
+    /* ── Divider ──────────────────────────────────────────── */
+    .divider { height: 2px; background: linear-gradient(90deg, var(--ai-blue), transparent); margin: 14px 0; border-radius: 1px; }
+
+    /* ── Nav hint ─────────────────────────────────────────── */
+    .nav-hint { color: rgba(255,255,255,0.4); font-size: 12px; text-align: center; margin-top: 8px; }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-button:hover:not(:disabled) {
+      background: rgba(255,255,255,0.16);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .nav-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .deck-status {
+      min-width: 90px;
+      text-align: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .deck-shell:fullscreen {
+      max-width: none;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      background: #1a1a2e;
+      padding: 18px;
+    }
+
+    .deck-shell:fullscreen .nav-hint {
+      opacity: 0.75;
+    }
+
+    .deck-shell:fullscreen .deck-controls {
+      margin-top: 6px;
+    }
+
+    @media (max-width: 1100px), (max-height: 760px) {
+      body {
+        padding: 16px;
+      }
+
+      .presentation {
+        transform-origin: center center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="deck-shell">
+<div class="presentation" id="presentation">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 1 — COVER
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-cover">
+  <div class="cover-center">
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:3px;opacity:0.6;">Engineering Quality Report · May 2026</div>
+    <div class="cover-title">Unit Testing &amp; Code Coverage<br>Analysis</div>
+    <div class="cover-subtitle">Current state, gaps, execution plan and optimizations across three core UI repositories</div>
+    <div class="cover-badge">
+      <span class="badge">Ticket-Intelligence-UI</span>
+      <span class="badge">Chatbot</span>
+      <span class="badge">copilot-ui</span>
+    </div>
+    <div class="cover-meta">
+      <span>📅 May 2026</span>
+      <span>👤 Engineering Quality Team</span>
+      <span>📊 Live Coverage Data</span>
+    </div>
+  </div>
+  <div class="slide-number">1 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 2 — EXECUTIVE SUMMARY
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-blue">
+  <div class="slide-header">
+    <div class="eyebrow">Overview</div>
+    <h2>Executive Summary</h2>
+    <div class="subtitle">Snapshot of unit testing posture across all three repositories</div>
+  </div>
+  <div class="slide-body">
+    <table>
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Framework</th>
+          <th>Statements</th>
+          <th>Branches</th>
+          <th>Functions</th>
+          <th>Gate Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ticket-Intelligence-UI</strong></td>
+          <td>Mocha + nyc</td>
+          <td><span class="chip chip-red">20.1%</span></td>
+          <td><span class="chip chip-red">17.5%</span></td>
+          <td><span class="chip chip-red">17.6%</span></td>
+          <td><span class="chip chip-red">⚠ Below threshold</span></td>
+        </tr>
+        <tr>
+          <td><strong>Chatbot</strong></td>
+          <td>Mocha + nyc</td>
+          <td><span class="chip chip-green">59.3%</span></td>
+          <td><span class="chip chip-yellow">53.8%</span></td>
+          <td><span class="chip chip-green">60.8%</span></td>
+          <td><span class="chip chip-green">✅ Passing</span></td>
+        </tr>
+        <tr>
+          <td><strong>copilot-ui</strong></td>
+          <td>Vitest + Cypress + Playwright</td>
+          <td><span class="chip chip-yellow">23.6%</span></td>
+          <td><span class="chip chip-red">12.5%</span></td>
+          <td><span class="chip chip-yellow">20.6%</span></td>
+          <td><span class="chip chip-green">✅ (6% gate — too low)</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="spacer"></div>
+    <div class="cols3">
+      <div class="kpi-card red">
+        <div class="kpi-num">40.9%</div>
+        <div class="kpi-label">TI-UI Mutation Score</div>
+        <div class="kpi-sub">Stryker on DataHandlers</div>
+      </div>
+      <div class="kpi-card yellow">
+        <div class="kpi-num">399</div>
+        <div class="kpi-label">Uncovered Mutants</div>
+        <div class="kpi-sub">KBDocumentsDataHandler alone</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-num">0%</div>
+        <div class="kpi-label">copilot-ui Components</div>
+        <div class="kpi-sub">settings / error / home / thread/reply</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="logo">AISERA</span>
+    <span class="date">May 2026</span>
+  </div>
+  <div class="slide-number">2 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 3 — TI-UI: Current State
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e8eaf6;">
+    <div class="eyebrow">Ticket-Intelligence-UI · Current State</div>
+    <h2>Testing Architecture &amp; Test Counts</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag">Framework Stack</div>
+        <ul class="bullets">
+          <li><strong>Test runner:</strong> Mocha (3 configs: global / server / web)</li>
+          <li><strong>Coverage:</strong> nyc (Istanbul) — 3 separate .nycrc files</li>
+          <li><strong>Languages:</strong> JavaScript + TypeScript (ts-node)</li>
+          <li><strong>Mutation:</strong> Stryker (oauth + tenants + DataHandlers)</li>
+          <li><strong>Pattern:</strong> require.cache injection via <code>injectMock</code></li>
+          <li><strong>Location:</strong> <code>test/</code> mirroring source structure</li>
+        </ul>
+        <div class="spacer"></div>
+        <div class="section-tag orange">Test Counts (approx.)</div>
+        <table>
+          <thead><tr><th>Directory</th><th>Spec Files</th></tr></thead>
+          <tbody>
+            <tr><td>test/app/**</td><td>~200</td></tr>
+            <tr><td>test/zplex/**</td><td>~40</td></tr>
+            <tr><td>test/src/server/ (TS)</td><td>~15</td></tr>
+            <tr><td>test/aisera/**</td><td>~30</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>~285</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag">Highlights</div>
+        <ul class="bullets">
+          <li>Root hook auto-restores mock state via <code>afterEach</code></li>
+          <li><code>buildExpressApp</code> helper for TypeScript route tests (supertest)</li>
+          <li>5 documented test patterns in TESTING.md</li>
+          <li>Stryker mutation score: <strong>40.91%</strong> overall / <strong>69.76%</strong> covered</li>
+        </ul>
+        <div class="spacer"></div>
+        <div class="section-tag orange">Concerns</div>
+        <ul class="bullets">
+          <li>Global threshold set at 59.3% but actual = 20.1% — <strong>gate misconfigured</strong></li>
+          <li>Tests run sequentially (nock/jsdom conflicts)</li>
+          <li>Web layer (AMD) practically untested</li>
+          <li><code>src/server</code> TypeScript routes at 0% coverage</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">3 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 4 — TI-UI: Coverage by Module
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e8eaf6;">
+    <div class="eyebrow">Ticket-Intelligence-UI · Coverage</div>
+    <h2>Module-Level Coverage Breakdown</h2>
+  </div>
+  <div class="slide-body">
+    <div class="progress-wrap">
+      <div class="progress-item">
+        <div class="progress-label">acl / audit / config</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:100%">100%</div></div>
+        <div class="progress-pct">100%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">dashboards / demo</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:97%">97%</div></div>
+        <div class="progress-pct">97%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">cmdb / dataTypes</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:94%">94%</div></div>
+        <div class="progress-pct">94%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">contentUnits / conversations</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:89%">89%</div></div>
+        <div class="progress-pct">89%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">ai / backend</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:81%">81%</div></div>
+        <div class="progress-pct">81%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">bots / channels</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:73%">73%</div></div>
+        <div class="progress-pct">73%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">entities</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:66%">66%</div></div>
+        <div class="progress-pct">66%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">dataSources / aiseraAlerts</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:59%">59%</div></div>
+        <div class="progress-pct">59%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">entityLists</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-low" style="width:35%">35%</div></div>
+        <div class="progress-pct">35%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">clusters / emails / src / zplex</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-low" style="width:0%;background:#c62828;">0%</div></div>
+        <div class="progress-pct" style="color:#c62828">0%</div>
+      </div>
+    </div>
+    <div class="caption">Statements coverage per module · Source: reports/lcov-report · May 2026</div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">4 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 5 — TI-UI: Gaps & Mutation
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #fce4ec;">
+    <div class="eyebrow">Ticket-Intelligence-UI · Gaps</div>
+    <h2>Critical Gaps &amp; Mutation Analysis</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag red">Zero Coverage (P0)</div>
+        <table>
+          <thead><tr><th>Module / File</th><th>Mutants</th></tr></thead>
+          <tbody>
+            <tr><td>kb/KBDocumentsDataHandler.js</td><td style="color:#c62828;font-weight:700">399</td></tr>
+            <tr><td>aiseraAlerts/AiseraAlertClusters</td><td>41</td></tr>
+            <tr><td>clusters/ClustersDataHandler.js</td><td>38</td></tr>
+            <tr><td>si/SITicketsDataHandler.js</td><td>27</td></tr>
+            <tr><td>kb/GeneratedKBDataHandler.js</td><td>28</td></tr>
+            <tr><td>emails/* (controllers)</td><td>~14</td></tr>
+            <tr><td>src/server (TS routes)</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag red">Weak Assertions (Mutation &lt; 50%)</div>
+        <table>
+          <thead><tr><th>Module</th><th>Score</th><th>Survived</th></tr></thead>
+          <tbody>
+            <tr><td>FlowsDataHandler.js</td><td style="color:#c62828;font-weight:700">7.9%</td><td>72</td></tr>
+            <tr><td>EntityListMappings</td><td style="color:#c62828;font-weight:700">11.8%</td><td>5</td></tr>
+            <tr><td>UserDataHandler.js</td><td style="color:#c62828;font-weight:700">15.3%</td><td>14</td></tr>
+            <tr><td>IntentRevisionsDataHandler</td><td style="color:#e65100;font-weight:700">25.9%</td><td>124</td></tr>
+            <tr><td>FulfillmentsDataHandler</td><td style="color:#e65100;font-weight:700">30.5%</td><td>64</td></tr>
+            <tr><td>RequestsDataHandler.js</td><td style="color:#e65100;font-weight:700">32.4%</td><td>71</td></tr>
+          </tbody>
+        </table>
+        <div class="spacer"></div>
+        <div class="kpi-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="kpi-card red">
+            <div class="kpi-num">40.9%</div>
+            <div class="kpi-label">Overall mutation score</div>
+          </div>
+          <div class="kpi-card yellow">
+            <div class="kpi-num">3,609</div>
+            <div class="kpi-label">No-coverage mutants</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">5 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 6 — TI-UI: Execution Plan
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e8eaf6;">
+    <div class="eyebrow">Ticket-Intelligence-UI · Roadmap</div>
+    <h2>Step-by-Step Execution Plan</h2>
+  </div>
+  <div class="slide-body">
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">1</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 1</div>
+          <h4>Foundation &amp; Fast Gaps</h4>
+          <p>Align .nycrc threshold to actual passing values · Add clusters/emails specs · Add TS route tests via buildExpressApp</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot orange">2</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 2</div>
+          <h4>DataHandler Strike Team — KBDocumentsDataHandler (399 mutants)</h4>
+          <p>Full spec for KBDocumentsDataHandler + GeneratedKBDataHandler · Widen assertions on Flows/Requests/User DataHandlers · Target mutation score 55%</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot orange">3</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 3</div>
+          <h4>Medium-Coverage Expansion → 75–80%</h4>
+          <p>dataSources / entities / bots / aiseraAlerts · Botbuilder &amp; data-source connector stubs</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot green">4</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 4</div>
+          <h4>Hardening &amp; Threshold Ratchet</h4>
+          <p>Evaluate AMD web testing · Raise thresholds: statements → 40%, branches → 35% · Expand Stryker scope to entities</p>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-num">20%→45%</div><div class="kpi-label">Statements target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">17%→38%</div><div class="kpi-label">Branches target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">40%→60%</div><div class="kpi-label">Mutation target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">4 wks</div><div class="kpi-label">Timeline</div></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">6 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 7 — CHATBOT: Current State
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e0f2f1;">
+    <div class="eyebrow">Chatbot · Current State</div>
+    <h2>Testing Architecture &amp; Test Counts</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag teal">Framework Stack</div>
+        <ul class="bullets">
+          <li><strong>Test runner:</strong> Mocha (sequential — parallel disabled)</li>
+          <li><strong>Coverage:</strong> nyc (Istanbul) — single .nycrc</li>
+          <li><strong>Languages:</strong> JavaScript + TypeScript via ts-node</li>
+          <li><strong>No mutation testing</strong> configured</li>
+          <li><strong>Exclusions:</strong> core/, src/, zplex/, config/, bin/, assets/</li>
+        </ul>
+        <div class="spacer"></div>
+        <div class="section-tag teal">Test Counts</div>
+        <table>
+          <thead><tr><th>Directory</th><th>Files</th></tr></thead>
+          <tbody>
+            <tr><td>test/chatbot/</td><td>~90</td></tr>
+            <tr><td>test/slack/ + email/</td><td>~60</td></tr>
+            <tr><td>test/teams/ + webex/</td><td>~50</td></tr>
+            <tr><td>test/glip/ + sms/ + others</td><td>~60</td></tr>
+            <tr><td>test/src/ (TS)</td><td>~15</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>~275</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag">Best-in-Class Modules</div>
+        <table>
+          <thead><tr><th>Channel</th><th>Statements</th></tr></thead>
+          <tbody>
+            <tr><td>sunshine/server</td><td><span class="chip chip-green">100%</span></td></tr>
+            <tr><td>ringCentralAssist/server</td><td><span class="chip chip-green">100%</span></td></tr>
+            <tr><td>sms/server</td><td><span class="chip chip-green">98.1%</span></td></tr>
+            <tr><td>googleChat/server</td><td><span class="chip chip-green">96.3%</span></td></tr>
+            <tr><td>slack/server</td><td><span class="chip chip-green">95.1%</span></td></tr>
+            <tr><td>chatbot/server/grpc</td><td><span class="chip chip-green">100%</span></td></tr>
+          </tbody>
+        </table>
+        <div class="spacer"></div>
+        <div class="section-tag orange">Critical Gap</div>
+        <ul class="bullets">
+          <li><code>src/</code> directory fully excluded from coverage — new TS code invisible</li>
+          <li>No mutation testing — assertion quality unknown</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">7 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 8 — CHATBOT: Coverage
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e0f2f1;">
+    <div class="eyebrow">Chatbot · Coverage</div>
+    <h2>Module-Level Coverage — 59.3% Overall Statements</h2>
+  </div>
+  <div class="slide-body">
+    <div class="kpi-grid" style="margin-bottom:14px">
+      <div class="kpi-card green"><div class="kpi-num">59.3%</div><div class="kpi-label">Statements</div><div class="kpi-sub">Gate: 52% ✅</div></div>
+      <div class="kpi-card yellow"><div class="kpi-num">53.8%</div><div class="kpi-label">Branches</div><div class="kpi-sub">Gate: 48% ✅</div></div>
+      <div class="kpi-card green"><div class="kpi-num">60.8%</div><div class="kpi-label">Functions</div><div class="kpi-sub">Gate: 56% ✅</div></div>
+      <div class="kpi-card green"><div class="kpi-num">59.3%</div><div class="kpi-label">Lines</div><div class="kpi-sub">Gate: 57% ✅</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-item">
+        <div class="progress-label">sunshine / ringCentral</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:100%">100%</div></div>
+        <div class="progress-pct">100%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">sms / googleChat / glip</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:96%">96%</div></div>
+        <div class="progress-pct">96%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">slack / ivr</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:95%">95%</div></div>
+        <div class="progress-pct">95%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">copilot/server</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:87%">87%</div></div>
+        <div class="progress-pct">87%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">email/server</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:85%">85%</div></div>
+        <div class="progress-pct">85%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">chatbot/server (main)</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:75.5%">75.5%</div></div>
+        <div class="progress-pct">75.5%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">teams/server</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:70.4%">70.4%</div></div>
+        <div class="progress-pct">70.4%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">webchat/server</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:70%">70%</div></div>
+        <div class="progress-pct">70%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">twitter/server</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:59.1%">59%</div></div>
+        <div class="progress-pct">59%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">webchat/web (AMD)</div>
+        <div class="progress-bar-outer"><div class="progress-bar-fill bar-low" style="width:0%;background:#c62828;">0%</div></div>
+        <div class="progress-pct" style="color:#c62828">0%</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">8 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 9 — CHATBOT: Gaps & Plan
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #e0f2f1;">
+    <div class="eyebrow">Chatbot · Gaps &amp; Roadmap</div>
+    <h2>Uncovered Areas &amp; Execution Plan</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag red">Gaps</div>
+        <table>
+          <thead><tr><th>Module</th><th>Issue</th></tr></thead>
+          <tbody>
+            <tr><td><code>src/**</code> (all TypeScript)</td><td><span class="chip chip-red">Excluded from .nycrc</span></td></tr>
+            <tr><td>webchat/web AMD layer</td><td><span class="chip chip-red">0% coverage</span></td></tr>
+            <tr><td>twitter/server</td><td><span class="chip chip-yellow">59.1% — OAuth gap</span></td></tr>
+            <tr><td>teams/server</td><td><span class="chip chip-yellow">70.4% — auth refresh</span></td></tr>
+            <tr><td>webchat/server</td><td><span class="chip chip-yellow">70% — sessions</span></td></tr>
+            <tr><td>Mutation testing</td><td><span class="chip chip-red">Not configured</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag teal">Execution Plan</div>
+        <div class="timeline" style="padding-top:4px">
+          <div class="tl-item">
+            <div class="tl-dot" style="width:30px;height:30px;font-size:12px">1</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 1</div>
+              <h4>Remove src/ exclusion · Add TS controller specs</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot orange" style="width:30px;height:30px;font-size:12px">2</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 2</div>
+              <h4>twitter/teams/webchat/chatbot → 80% · Stryker bootstrap</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot green" style="width:30px;height:30px;font-size:12px">3</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 3</div>
+              <h4>Enable --parallel mocha · webchat/web strategy</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot teal" style="width:30px;height:30px;font-size:12px">4</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 4</div>
+              <h4>Raise thresholds · mutation gate · CI hardening</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-num">59%→70%</div><div class="kpi-label">Statements target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">54%→65%</div><div class="kpi-label">Branches target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">0%→55%</div><div class="kpi-label">Mutation target (new)</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">40% faster</div><div class="kpi-label">CI with parallel</div></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">9 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 10 — COPILOT-UI: Current State
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #fff3e0;">
+    <div class="eyebrow">copilot-ui · Current State</div>
+    <h2>Testing Architecture — Multi-Layer Stack</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag orange">Framework Stack</div>
+        <table>
+          <thead><tr><th>Layer</th><th>Framework</th></tr></thead>
+          <tbody>
+            <tr><td>Unit</td><td>Vitest 2 + Istanbul</td></tr>
+            <tr><td>Component</td><td>Cypress 13</td></tr>
+            <tr><td>E2E (legacy)</td><td>Cypress 13</td></tr>
+            <tr><td>E2E (current)</td><td><strong>Playwright 1.59</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="spacer"></div>
+        <div class="section-tag orange">Test Counts</div>
+        <table>
+          <thead><tr><th>Suite</th><th>Files</th></tr></thead>
+          <tbody>
+            <tr><td>src/tests/reducers + selectors + context</td><td>~20</td></tr>
+            <tr><td>src/tests/helpers + hooks + api</td><td>~20</td></tr>
+            <tr><td>src/tests/component/**</td><td>~40</td></tr>
+            <tr><td>src/tests/wrappers/sdk</td><td>~5</td></tr>
+            <tr><td>Playwright E2E</td><td>~10</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>~95</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag">Well-Covered Areas</div>
+        <ul class="bullets">
+          <li><code>src/interfaces</code> — 100% (type definitions)</li>
+          <li><code>src/context</code> — 91.7%</li>
+          <li><code>src/selectors</code> — 90.4%</li>
+          <li><code>src/reducers</code> — 78.3%</li>
+          <li><code>src/helpers</code> — 78.2%</li>
+        </ul>
+        <div class="spacer"></div>
+        <div class="section-tag orange">Concerns</div>
+        <ul class="bullets">
+          <li>Coverage threshold only <strong>6%</strong> — effectively no gate</li>
+          <li>Components account for ~65% of source but &lt;10% coverage</li>
+          <li>Cypress vs Vitest duplication — no deduplication strategy</li>
+          <li>No mutation testing</li>
+          <li>Merged coverage report not enforced as CI gate</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">10 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 11 — COPILOT-UI: Coverage Detail
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #fff3e0;">
+    <div class="eyebrow">copilot-ui · Coverage</div>
+    <h2>Vitest Coverage Breakdown — 23.6% Statements</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="h3">High Coverage ✅</div>
+        <div class="progress-wrap">
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">interfaces</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:100%">100%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">context</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:91.7%">91.7%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">selectors</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-high" style="width:90.4%">90.4%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">reducers</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:78.3%">78.3%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">helpers</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:78.2%">78.2%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">router</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:51.9%">51.9%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">wrappers/sdk</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-medium" style="width:49.8%">49.8%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">api</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-low" style="width:40.5%">40.5%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:130px">hooks</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-low" style="width:24%">24%</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="h3">Components — Critical Gaps 🔴</div>
+        <table>
+          <thead><tr><th>Component Module</th><th>Stmts</th></tr></thead>
+          <tbody>
+            <tr><td>thread/reply</td><td><span class="chip chip-red">0%</span></td></tr>
+            <tr><td>home / error / settings</td><td><span class="chip chip-red">0%</span></td></tr>
+            <tr><td>wrappers/iframe</td><td><span class="chip chip-red">0%</span></td></tr>
+            <tr><td>responseElements</td><td><span class="chip chip-red">0.9%</span></td></tr>
+            <tr><td>thread (main)</td><td><span class="chip chip-red">1.0%</span></td></tr>
+            <tr><td>notification</td><td><span class="chip chip-red">2.1%</span></td></tr>
+            <tr><td>fileManagement</td><td><span class="chip chip-red">2.5%</span></td></tr>
+            <tr><td>citation</td><td><span class="chip chip-red">5.7%</span></td></tr>
+            <tr><td>login</td><td><span class="chip chip-red">7.7%</span></td></tr>
+            <tr><td>aiseraPlay</td><td><span class="chip chip-red">9.3%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">11 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 12 — COPILOT-UI: Execution Plan
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #fff3e0;">
+    <div class="eyebrow">copilot-ui · Roadmap</div>
+    <h2>Step-by-Step Execution Plan</h2>
+  </div>
+  <div class="slide-body">
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">1</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 1</div>
+          <h4>Raise the Floor — Thresholds &amp; Trivial Zeros</h4>
+          <p>Raise Vitest thresholds to 20%/12%/18%/20% · Add error/home component render tests · Add useConnectionStatus test · iframe wrapper basic mount tests</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot orange">2</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 2</div>
+          <h4>High-Value Component Blitz</h4>
+          <p>thread → 40% · responseElements → 30% · fileManagement → 25% · notification → 30% · login → 40% (Auth0 mocking)</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot orange">3</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 3</div>
+          <h4>API, Hooks &amp; Settings Sweep</h4>
+          <p>api → 70% (socket.io mocking) · hooks → 60% · aiseraPlay → 40% · settings → 40% · router function coverage → 60%</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot green">4</div>
+        <div class="tl-content">
+          <div class="tl-weeks">Week 4</div>
+          <h4>Hardening — Mutation Testing &amp; Framework Consolidation</h4>
+          <p>Add Stryker to CI · Decide Cypress vs Vitest per component · Raise thresholds to 40% statements / 25% branches · Enforce merged coverage gate</p>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-num">24%→45%</div><div class="kpi-label">Statements target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">12%→28%</div><div class="kpi-label">Branches target</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">6%→40%</div><div class="kpi-label">Gate threshold</div></div>
+      <div class="kpi-card blue"><div class="kpi-num">0→55%</div><div class="kpi-label">Mutation (new)</div></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">12 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 13 — TIMELINE MASTER VIEW
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-dark">
+  <div class="slide-header">
+    <div class="eyebrow">All Repos · Master Timeline</div>
+    <h2>4-Week Execution Calendar</h2>
+  </div>
+  <div class="slide-body">
+    <table>
+      <thead>
+        <tr>
+          <th>Weeks</th>
+          <th>TI-UI</th>
+          <th>Chatbot</th>
+          <th>copilot-ui</th>
+          <th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Week 1</strong></td>
+          <td>Fix .nycrc gate · clusters/emails specs · TS routes</td>
+          <td>Remove src/ exclusion · TS controller specs</td>
+          <td>Raise thresholds · error/home/useConnectionStatus</td>
+          <td><span class="chip chip-yellow">Medium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Week 2</strong></td>
+          <td>KBDocumentsDataHandler (399 mutants) · DataHandler sweep</td>
+          <td>twitter/teams/webchat/chatbot → 80%</td>
+          <td>thread/responseElements/fileManagement coverage</td>
+          <td><span class="chip chip-red">High (TI-UI)</span></td>
+        </tr>
+        <tr>
+          <td><strong>Week 3</strong></td>
+          <td>dataSources/entities/bots → 75%+</td>
+          <td>Stryker setup + parallel mocha groundwork</td>
+          <td>api/hooks/login → 50%+</td>
+          <td><span class="chip chip-yellow">Medium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Week 4</strong></td>
+          <td>Threshold ratchet · Stryker expand · AMD test decision</td>
+          <td>Thresholds → 65% stmts / 60% branches · mutation gate</td>
+          <td>Stryker · Cypress/Vitest consolidation · 40% gate</td>
+          <td><span class="chip chip-yellow">Medium</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">13 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 14 — RISK REGISTER
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header" style="background: #fce4ec;">
+    <div class="eyebrow">All Repos · Risks</div>
+    <h2>Risk Register</h2>
+  </div>
+  <div class="slide-body">
+    <table>
+      <thead>
+        <tr>
+          <th>Risk</th>
+          <th>Repo</th>
+          <th>Severity</th>
+          <th>Mitigation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Coverage gate threshold set to 59.3% but actual = 20% — CI allows broken code</td>
+          <td>TI-UI</td>
+          <td class="risk-critical">🔴 Critical</td>
+          <td>Fix .nycrc thresholds immediately to reflect achievable state</td>
+        </tr>
+        <tr>
+          <td><code>src/</code> exclusion in .nycrc — all new TypeScript code undetected</td>
+          <td>Chatbot</td>
+          <td class="risk-critical">🔴 Critical</td>
+          <td>Remove exclusion; accept gate dip; add TS tests</td>
+        </tr>
+        <tr>
+          <td>copilot-ui coverage threshold at 6% — effectively no enforcement</td>
+          <td>copilot-ui</td>
+          <td class="risk-high">🟠 High</td>
+          <td>Raise to ≥20% in Week 1</td>
+        </tr>
+        <tr>
+          <td>KBDocumentsDataHandler.js has 399 untested mutants — biggest single gap</td>
+          <td>TI-UI</td>
+          <td class="risk-high">🟠 High</td>
+          <td>Dedicate 2-dev sprint; pair programming</td>
+        </tr>
+        <tr>
+          <td>Parallel test execution blocked by nock/jsdom conflicts — CI is slow</td>
+          <td>TI-UI, Chatbot</td>
+          <td class="risk-medium">🟡 Medium</td>
+          <td>Resolve in Week 3; isolate nock per-test</td>
+        </tr>
+        <tr>
+          <td>Cypress vs Vitest duplication in copilot-ui — maintenance overhead</td>
+          <td>copilot-ui</td>
+          <td class="risk-medium">🟡 Medium</td>
+          <td>Tech decision in Week 4 to consolidate</td>
+        </tr>
+        <tr>
+          <td>AMD web-layer modules structurally hard to unit test</td>
+          <td>TI-UI, Chatbot</td>
+          <td class="risk-medium">🟡 Medium</td>
+          <td>Evaluate Playwright component tests as alternative</td>
+        </tr>
+        <tr>
+          <td>No mutation testing on Chatbot or copilot-ui — assertion quality unknown</td>
+          <td>Chatbot, copilot-ui</td>
+          <td class="risk-medium">🟡 Medium</td>
+          <td>Add Stryker in Week 4 for both repos</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">14 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 15 — ADDITIONAL REPOS BASELINE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-dark">
+  <div class="slide-header">
+    <div class="eyebrow">Additional Repos · Baseline</div>
+    <h2>Other UI/Service 11 Repos — Current Test/Coverage State</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag">Service Repos</div>
+        <table style="font-size:11px">
+          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th></tr></thead>
+          <tbody>
+            <tr><td>amplify-chat-service</td><td>Jest</td><td>~44</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>amplify-orchestration-service</td><td>pytest</td><td>~57</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>ng-backend</td><td>Jest</td><td>~93</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>node-rendering-service</td><td>Node</td><td>0</td><td><span class="chip chip-red">No test setup</span></td></tr>
+            <tr><td>user-role-mgmt-service</td><td>Turbo + Jest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-tag orange">UI / Component Repos</div>
+        <table style="font-size:11px">
+          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th></tr></thead>
+          <tbody>
+            <tr><td>amplify-studio-app</td><td>Vitest</td><td>~98</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>amplify-chat-app</td><td>Vitest</td><td>~64</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>ng-frontend</td><td>Jest</td><td>~94</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>ng-uicomponent</td><td>Jest mono</td><td>~122</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>user-role-mgmt-app</td><td>Vitest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>uicomponent</td><td>Jest + Storybook</td><td>~40</td><td><span class="chip chip-red">Missing</span></td></tr>
+          </tbody>
+        </table>
+        <div class="caption" style="color:rgba(255,255,255,0.6)">No local lcov/html artifacts found yet for the requested repo set, including uicomponent.</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">15 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 16 — ADDITIONAL REPOS PLAN
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-white">
+  <div class="slide-header">
+    <div class="eyebrow">Additional Repos · Gaps &amp; Plan</div>
+    <h2>4-Week Execution Plan for Requested Repo Group</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols2">
+      <div>
+        <div class="section-tag red">Key Gaps Identified</div>
+        <ul class="bullets">
+          <li>Coverage reports absent across all 10 available repos in this batch</li>
+          <li><strong>node-rendering-service</strong> has no unit-test runner (placeholder test script)</li>
+          <li>Very thin baseline tests in both user-role-management repos (~1 each)</li>
+          <li>`.nycrc` repos keep <code>check-coverage=false</code>, so no hard gate</li>
+          <li>No explicit coverage thresholds in most Jest/Vitest pipelines</li>
+          <li><strong>uicomponent</strong> has active Jest tests but no baseline coverage artifact and no threshold gate</li>
+        </ul>
+      </div>
+      <div>
+        <div class="section-tag">4-Week Plan</div>
+        <div class="timeline" style="padding-top:4px">
+          <div class="tl-item">
+            <div class="tl-dot" style="width:30px;height:30px;font-size:12px">1</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 1</div>
+              <h4>Generate baseline coverage for all available repos</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot orange" style="width:30px;height:30px;font-size:12px">2</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 2</div>
+              <h4>Enable starter coverage gates and fix no-test repos</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot green" style="width:30px;height:30px;font-size:12px">3</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 3</div>
+              <h4>Critical path test expansion (auth, routes, API, UI components)</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot teal" style="width:30px;height:30px;font-size:12px">4</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 4</div>
+              <h4>Threshold ratchet + PR delta coverage enforcement</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">16 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 17 — TARGETS SUMMARY
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-dark">
+  <div class="slide-header">
+    <div class="eyebrow">All Repos · Targets</div>
+    <h2>End-State Coverage Targets (4 Weeks)</h2>
+  </div>
+  <div class="slide-body">
+    <div class="cols3">
+      <!-- TI-UI -->
+      <div style="background:rgba(21,101,192,0.15);border-radius:8px;padding:16px;border:1px solid rgba(0,180,216,0.3)">
+        <div style="font-size:13px;font-weight:700;color:var(--ai-accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Ticket-Intelligence-UI</div>
+        <div class="progress-wrap">
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:45%">45%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:38%">38%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:42%">42%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:60%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">60%</div></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 20.1% stmts / 40.9% mutation</div>
+      </div>
+
+      <!-- Chatbot -->
+      <div style="background:rgba(0,105,92,0.15);border-radius:8px;padding:16px;border:1px solid rgba(0,180,216,0.3)">
+        <div style="font-size:13px;font-weight:700;color:var(--ai-accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Chatbot</div>
+        <div class="progress-wrap">
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:70%">70%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:65%">65%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:72%">72%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation (new)</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:55%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">55%</div></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 59.3% stmts / no mutation</div>
+      </div>
+
+      <!-- copilot-ui -->
+      <div style="background:rgba(230,81,0,0.15);border-radius:8px;padding:16px;border:1px solid rgba(0,180,216,0.3)">
+        <div style="font-size:13px;font-weight:700;color:var(--ai-accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">copilot-ui</div>
+        <div class="progress-wrap">
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:45%">45%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:28%">28%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:40%">40%</div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation (new)</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:55%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">55%</div></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 23.6% stmts / 6% gate</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,0.06);border-radius:8px;border-left:3px solid var(--ai-accent)">
+      <div style="font-size:13px;color:rgba(255,255,255,0.85)">All targets are compressed into 4 weeks and require a dedicated swarm model: 1 QE plus 2 dev engineers per repo working in parallel, with daily triage and shared mock infrastructure.</div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
+  <div class="slide-number">17 / 18</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SLIDE 18 — NEXT STEPS / CLOSE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide theme-cover">
+  <div class="cover-center">
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:3px;opacity:0.6;">Recommended Actions</div>
+    <div class="cover-title" style="font-size:30px">Immediate Next Steps</div>
+    <div style="display:flex;flex-direction:column;gap:12px;text-align:left;max-width:700px;width:100%;margin-top:8px">
+      <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #c62828">
+        <div style="font-size:12px;font-weight:700;color:#ff8a80;margin-bottom:3px">🔴 P0 — Do This Week</div>
+        <div style="font-size:13px">Fix TI-UI .nycrc threshold misconfiguration · Remove Chatbot src/ exclusion · Raise copilot-ui gate from 6% to 20%</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #e65100">
+        <div style="font-size:12px;font-weight:700;color:#ffab40;margin-bottom:3px">🟠 P1 — Week 1</div>
+        <div style="font-size:13px">Zero-coverage module specs (clusters/emails/home/error) · TS controller tests in Chatbot · baseline coverage generation for the 10 additional repos in scope</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #f9a825">
+        <div style="font-size:12px;font-weight:700;color:#ffe57f;margin-bottom:3px">🟡 P2 — Weeks 2–3</div>
+        <div style="font-size:13px">KBDocumentsDataHandler full spec (2 devs) · twitter/teams/webchat/chatbot push to 80% · thread/responseElements component tests in copilot-ui</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #2e7d32">
+        <div style="font-size:12px;font-weight:700;color:#a5d6a7;margin-bottom:3px">🟢 P3 — Week 4</div>
+        <div style="font-size:13px">Mutation testing on all repos · Parallel mocha hardening · Coverage automation and PR delta gates for the additional repo batch · Framework consolidation in copilot-ui</div>
+      </div>
+    </div>
+    <div class="cover-meta" style="margin-top:16px">
+      <span>📄 Full analysis: unit-testing-analysis-confluence.md</span>
+      <span>📊 Coverage reports: reports/lcov-report &amp; coverage/vitest</span>
+    </div>
+  </div>
+  <div class="slide-number" style="color:rgba(255,255,255,0.4)">18 / 18</div>
+</div>
+
+</div><!-- /presentation -->
+<div class="deck-controls" aria-label="Slide navigation">
+  <button class="nav-button" id="prev-slide" type="button">Previous</button>
+  <div class="deck-status" id="deck-status">1 / 18</div>
+  <button class="nav-button" id="toggle-fullscreen" type="button">Fullscreen</button>
+  <button class="nav-button" id="next-slide" type="button">Next</button>
+</div>
+<div class="nav-hint">Use Previous/Next, arrow keys, Home, End, or F for fullscreen</div>
+</div>
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.presentation .slide'));
+    const deckShell = document.querySelector('.deck-shell');
+    const presentation = document.getElementById('presentation');
+    const prevButton = document.getElementById('prev-slide');
+    const nextButton = document.getElementById('next-slide');
+    const fullscreenButton = document.getElementById('toggle-fullscreen');
+    const status = document.getElementById('deck-status');
+    const totalSlides = slides.length;
+    let activeIndex = 0;
+
+    function fitPresentation() {
+      const controlsHeight = document.fullscreenElement ? 92 : 110;
+      const horizontalPadding = document.fullscreenElement ? 24 : 32;
+      const availableWidth = window.innerWidth - horizontalPadding;
+      const availableHeight = window.innerHeight - controlsHeight;
+      const baseWidth = 960;
+      const baseHeight = 540;
+      const scale = Math.min(availableWidth / baseWidth, availableHeight / baseHeight);
+
+      presentation.style.transform = `scale(${scale})`;
+      presentation.style.width = `${baseWidth}px`;
+      presentation.style.height = `${baseHeight}px`;
+      presentation.style.marginBottom = `${Math.max(0, (scale - 1) * baseHeight * 0.15)}px`;
+    }
+
+    function updateFullscreenButton() {
+      fullscreenButton.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
+      fullscreenButton.setAttribute('aria-pressed', document.fullscreenElement ? 'true' : 'false');
+    }
+
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else {
+          await deckShell.requestFullscreen();
+        }
+      } catch (error) {
+        console.error('Unable to toggle fullscreen presentation mode.', error);
+      }
+    }
+
+    function renderSlide(index) {
+      activeIndex = Math.max(0, Math.min(index, totalSlides - 1));
+
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-active', slideIndex === activeIndex);
+        slide.setAttribute('aria-hidden', slideIndex === activeIndex ? 'false' : 'true');
+      });
+
+      prevButton.disabled = activeIndex === 0;
+      nextButton.disabled = activeIndex === totalSlides - 1;
+      status.textContent = `${activeIndex + 1} / ${totalSlides}`;
+      document.title = `Slide ${activeIndex + 1}/${totalSlides} - Unit Testing & Code Coverage Analysis`;
+    }
+
+    prevButton.addEventListener('click', () => renderSlide(activeIndex - 1));
+    nextButton.addEventListener('click', () => renderSlide(activeIndex + 1));
+    fullscreenButton.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+        event.preventDefault();
+        renderSlide(activeIndex - 1);
+      }
+
+      if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') {
+        event.preventDefault();
+        renderSlide(activeIndex + 1);
+      }
+
+      if (event.key === 'Home') {
+        event.preventDefault();
+        renderSlide(0);
+      }
+
+      if (event.key === 'End') {
+        event.preventDefault();
+        renderSlide(totalSlides - 1);
+      }
+
+      if (event.key === 'f' || event.key === 'F') {
+        event.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      updateFullscreenButton();
+      fitPresentation();
+    });
+
+    window.addEventListener('resize', fitPresentation);
+
+    fitPresentation();
+    updateFullscreenButton();
+    renderSlide(0);
+  }());
+</script>
+</body>
+</html>
