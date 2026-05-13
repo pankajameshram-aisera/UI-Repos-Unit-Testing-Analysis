@@ -1002,7 +1002,7 @@
 <div class="slide theme-dark">
   <div class="slide-header">
     <div class="eyebrow">All Repos · Master Timeline</div>
-    <h2>4-Week Execution Calendar</h2>
+    <h2>6-Week Execution Calendar to &gt;90% Coverage</h2>
   </div>
   <div class="slide-body">
     <table>
@@ -1018,31 +1018,45 @@
       <tbody>
         <tr>
           <td><strong>Week 1</strong></td>
-          <td>Fix .nycrc gate · clusters/emails specs · TS routes</td>
-          <td>Remove src/ exclusion · TS controller specs</td>
-          <td>Raise thresholds · error/home/useConnectionStatus</td>
+          <td>Baseline reports + CI artifact standardization</td>
+          <td>Baseline reports + src/ scope visibility</td>
+          <td>Baseline reports + threshold prep</td>
           <td><span class="chip chip-yellow">Medium</span></td>
         </tr>
         <tr>
           <td><strong>Week 2</strong></td>
-          <td>KBDocumentsDataHandler (399 mutants) · DataHandler sweep</td>
-          <td>twitter/teams/webchat/chatbot → 80%</td>
-          <td>thread/responseElements/fileManagement coverage</td>
-          <td><span class="chip chip-red">High (TI-UI)</span></td>
+          <td>Hard gates enabled (starter threshold band)</td>
+          <td>Hard gates enabled (starter threshold band)</td>
+          <td>Hard gates enabled (starter threshold band)</td>
+          <td><span class="chip chip-yellow">Medium</span></td>
         </tr>
         <tr>
           <td><strong>Week 3</strong></td>
-          <td>dataSources/entities/bots → 75%+</td>
-          <td>Stryker setup + parallel mocha groundwork</td>
-          <td>api/hooks/login → 50%+</td>
-          <td><span class="chip chip-yellow">Medium</span></td>
+          <td>Service core-path acceleration (auth/data handlers)</td>
+          <td>Service core-path acceleration (channels/session)</td>
+          <td>API/hooks reliability sweep</td>
+          <td><span class="chip chip-red">High</span></td>
         </tr>
         <tr>
           <td><strong>Week 4</strong></td>
-          <td>Threshold ratchet · Stryker expand · AMD test decision</td>
-          <td>Thresholds → 65% stmts / 60% branches · mutation gate</td>
-          <td>Stryker · Cypress/Vitest consolidation · 40% gate</td>
+          <td>UI/component acceleration and flaky stabilization</td>
+          <td>Parallel execution hardening + quality controls</td>
+          <td>Component-heavy coverage expansion</td>
           <td><span class="chip chip-yellow">Medium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Week 5</strong></td>
+          <td>Ratchet all thresholds to 85%+ band</td>
+          <td>Ratchet all thresholds to 85%+ band</td>
+          <td>Ratchet all thresholds to 85%+ band</td>
+          <td><span class="chip chip-yellow">Medium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Week 6</strong></td>
+          <td>Enforce &gt;90% and close residual low modules</td>
+          <td>Enforce &gt;90% and lock CI gate</td>
+          <td>Enforce &gt;90% and lock CI gate</td>
+          <td><span class="chip chip-red">High (final gate)</span></td>
         </tr>
       </tbody>
     </table>
@@ -1138,27 +1152,27 @@
       <div>
         <div class="section-tag">Service Repos</div>
         <table style="font-size:11px">
-          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th></tr></thead>
+          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th><th>Wk6 Target</th></tr></thead>
           <tbody>
-            <tr><td>amplify-chat-service</td><td>Jest</td><td>~44</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>amplify-orchestration-service</td><td>pytest</td><td>~57</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>ng-backend</td><td>Jest</td><td>~93</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>node-rendering-service</td><td>Node</td><td>0</td><td><span class="chip chip-red">No test setup</span></td></tr>
-            <tr><td>user-role-mgmt-service</td><td>Turbo + Jest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>amplify-chat-service</td><td>Jest</td><td>~44</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>amplify-orchestration-service</td><td>pytest</td><td>~57</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>ng-backend</td><td>Jest</td><td>~93</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>node-rendering-service</td><td>Node</td><td>0</td><td><span class="chip chip-red">No test setup</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>user-role-mgmt-service</td><td>Turbo + Jest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
           </tbody>
         </table>
       </div>
       <div>
         <div class="section-tag orange">UI / Component Repos</div>
         <table style="font-size:11px">
-          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th></tr></thead>
+          <thead><tr><th>Repo</th><th>Stack</th><th>Tests</th><th>Coverage</th><th>Wk6 Target</th></tr></thead>
           <tbody>
-            <tr><td>amplify-studio-app</td><td>Vitest</td><td>~98</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>amplify-chat-app</td><td>Vitest</td><td>~64</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>ng-frontend</td><td>Jest</td><td>~94</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>ng-uicomponent</td><td>Jest mono</td><td>~122</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>user-role-mgmt-app</td><td>Vitest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td></tr>
-            <tr><td>uicomponent</td><td>Jest + Storybook</td><td>~40</td><td><span class="chip chip-red">Missing</span></td></tr>
+            <tr><td>amplify-studio-app</td><td>Vitest</td><td>~98</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>amplify-chat-app</td><td>Vitest</td><td>~64</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>ng-frontend</td><td>Jest</td><td>~94</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>ng-uicomponent</td><td>Jest mono</td><td>~122</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>user-role-mgmt-app</td><td>Vitest</td><td>~1</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
+            <tr><td>uicomponent</td><td>Jest + Storybook</td><td>~40</td><td><span class="chip chip-red">Missing</span></td><td><span class="chip chip-green">&gt;90%</span></td></tr>
           </tbody>
         </table>
         <div class="caption" style="color:rgba(255,255,255,0.6)">No local lcov/html artifacts found yet for the requested repo set, including uicomponent.</div>
@@ -1175,14 +1189,14 @@
 <div class="slide theme-white">
   <div class="slide-header">
     <div class="eyebrow">Additional Repos · Gaps &amp; Plan</div>
-    <h2>4-Week Execution Plan for Requested Repo Group</h2>
+    <h2>6-Week Execution Plan for Requested Repo Group (&gt;90%)</h2>
   </div>
   <div class="slide-body">
     <div class="cols2">
       <div>
         <div class="section-tag red">Key Gaps Identified</div>
         <ul class="bullets">
-          <li>Coverage reports absent across all 10 available repos in this batch</li>
+          <li>Coverage reports absent across all 11 repos in this additional batch</li>
           <li><strong>node-rendering-service</strong> has no unit-test runner (placeholder test script)</li>
           <li>Very thin baseline tests in both user-role-management repos (~1 each)</li>
           <li>`.nycrc` repos keep <code>check-coverage=false</code>, so no hard gate</li>
@@ -1191,34 +1205,48 @@
         </ul>
       </div>
       <div>
-        <div class="section-tag">4-Week Plan</div>
+        <div class="section-tag">6-Week Plan</div>
         <div class="timeline" style="padding-top:4px">
           <div class="tl-item">
             <div class="tl-dot" style="width:30px;height:30px;font-size:12px">1</div>
             <div class="tl-content">
               <div class="tl-weeks">Week 1</div>
-              <h4>Generate baseline coverage for all available repos</h4>
+              <h4>Generate baseline coverage for all repos in scope</h4>
             </div>
           </div>
           <div class="tl-item">
             <div class="tl-dot orange" style="width:30px;height:30px;font-size:12px">2</div>
             <div class="tl-content">
               <div class="tl-weeks">Week 2</div>
-              <h4>Enable starter coverage gates and fix no-test repos</h4>
+              <h4>Enable enforced starter gates and remove broad exclusions</h4>
             </div>
           </div>
           <div class="tl-item">
             <div class="tl-dot green" style="width:30px;height:30px;font-size:12px">3</div>
             <div class="tl-content">
               <div class="tl-weeks">Week 3</div>
-              <h4>Critical path test expansion (auth, routes, API, UI components)</h4>
+              <h4>Backend/service critical-path expansion</h4>
             </div>
           </div>
           <div class="tl-item">
             <div class="tl-dot teal" style="width:30px;height:30px;font-size:12px">4</div>
             <div class="tl-content">
               <div class="tl-weeks">Week 4</div>
-              <h4>Threshold ratchet + PR delta coverage enforcement</h4>
+              <h4>UI/component acceleration and flaky cleanup</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot orange" style="width:30px;height:30px;font-size:12px">5</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 5</div>
+              <h4>Raise thresholds to 85%+ on all repos</h4>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot green" style="width:30px;height:30px;font-size:12px">6</div>
+            <div class="tl-content">
+              <div class="tl-weeks">Week 6</div>
+              <h4>Enforce and sustain &gt;90% coverage gates</h4>
             </div>
           </div>
         </div>
@@ -1235,7 +1263,7 @@
 <div class="slide theme-dark">
   <div class="slide-header">
     <div class="eyebrow">All Repos · Targets</div>
-    <h2>End-State Coverage Targets (4 Weeks)</h2>
+    <h2>End-State Coverage Targets (Week 6)</h2>
   </div>
   <div class="slide-body">
     <div class="cols3">
@@ -1245,19 +1273,19 @@
         <div class="progress-wrap">
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:45%">45%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:38%">38%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:90%">90%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:42%">42%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
-            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:60%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">60%</div></div>
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Lines</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
         </div>
         <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 20.1% stmts / 40.9% mutation</div>
@@ -1269,19 +1297,19 @@
         <div class="progress-wrap">
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:70%">70%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:65%">65%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:90%">90%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:72%">72%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
-            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation (new)</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:55%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">55%</div></div>
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Lines</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
         </div>
         <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 59.3% stmts / no mutation</div>
@@ -1293,26 +1321,26 @@
         <div class="progress-wrap">
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Statements</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:45%">45%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Branches</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:28%">28%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:90%">90%</div></div>
           </div>
           <div class="progress-item">
             <div class="progress-label" style="width:90px;color:white;font-size:11px">Functions</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:40%">40%</div></div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
           <div class="progress-item">
-            <div class="progress-label" style="width:90px;color:white;font-size:11px">Mutation (new)</div>
-            <div class="progress-bar-outer"><div class="progress-bar-fill" style="width:55%;background:linear-gradient(90deg,#6a1b9a,#9c27b0)">55%</div></div>
+            <div class="progress-label" style="width:90px;color:white;font-size:11px">Lines</div>
+            <div class="progress-bar-outer"><div class="progress-bar-fill bar-threshold" style="width:92%">92%</div></div>
           </div>
         </div>
         <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Current: 23.6% stmts / 6% gate</div>
       </div>
     </div>
     <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,0.06);border-radius:8px;border-left:3px solid var(--ai-accent)">
-      <div style="font-size:13px;color:rgba(255,255,255,0.85)">All targets are compressed into 4 weeks and require a dedicated swarm model: 1 QE plus 2 dev engineers per repo working in parallel, with daily triage and shared mock infrastructure.</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85)">Same Week-6 target applies to all additional repos (amplify-*, ng-*, node-rendering-service, user-role-management-*, uicomponent): &gt;90% statements/branches/functions/lines with enforced CI gates.</div>
     </div>
   </div>
   <div class="slide-footer"><span class="logo">AISERA</span><span class="date">May 2026</span></div>
@@ -1333,15 +1361,15 @@
       </div>
       <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #e65100">
         <div style="font-size:12px;font-weight:700;color:#ffab40;margin-bottom:3px">🟠 P1 — Week 1</div>
-        <div style="font-size:13px">Zero-coverage module specs (clusters/emails/home/error) · TS controller tests in Chatbot · baseline coverage generation for the 10 additional repos in scope</div>
+        <div style="font-size:13px">Zero-coverage module specs (clusters/emails/home/error) · TS controller tests in Chatbot · baseline coverage generation for the 11 additional repos in scope</div>
       </div>
       <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #f9a825">
         <div style="font-size:12px;font-weight:700;color:#ffe57f;margin-bottom:3px">🟡 P2 — Weeks 2–3</div>
-        <div style="font-size:13px">KBDocumentsDataHandler full spec (2 devs) · twitter/teams/webchat/chatbot push to 80% · thread/responseElements component tests in copilot-ui</div>
+        <div style="font-size:13px">KBDocumentsDataHandler full spec (2 devs) · service critical-path expansion · thread/responseElements/component suites across UI repos</div>
       </div>
       <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:12px 16px;border-left:3px solid #2e7d32">
-        <div style="font-size:12px;font-weight:700;color:#a5d6a7;margin-bottom:3px">🟢 P3 — Week 4</div>
-        <div style="font-size:13px">Mutation testing on all repos · Parallel mocha hardening · Coverage automation and PR delta gates for the additional repo batch · Framework consolidation in copilot-ui</div>
+        <div style="font-size:12px;font-weight:700;color:#a5d6a7;margin-bottom:3px">🟢 P3 — Weeks 4–6</div>
+        <div style="font-size:13px">Ratchet all repos to 85% in Week 5 and enforce &gt;90% in Week 6 · mutation checks on critical services · PR delta gates + flaky cleanup</div>
       </div>
     </div>
     <div class="cover-meta" style="margin-top:16px">
