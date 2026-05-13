@@ -1354,20 +1354,16 @@
 
 </div><!-- /presentation -->
 <div class="deck-controls" aria-label="Slide navigation">
-  <button class="nav-button" id="prev-slide" type="button">Previous</button>
   <div class="deck-status" id="deck-status">1 / 18</div>
   <button class="nav-button" id="toggle-fullscreen" type="button">Fullscreen</button>
-  <button class="nav-button" id="next-slide" type="button">Next</button>
 </div>
-<div class="nav-hint">Use Previous/Next, arrow keys, Home, End, or F for fullscreen</div>
+<div class="nav-hint">Use arrow keys, Home, End, or F for fullscreen</div>
 </div>
 <script>
   (function () {
     const slides = Array.from(document.querySelectorAll('.presentation .slide'));
     const deckShell = document.querySelector('.deck-shell');
     const presentation = document.getElementById('presentation');
-    const prevButton = document.getElementById('prev-slide');
-    const nextButton = document.getElementById('next-slide');
     const fullscreenButton = document.getElementById('toggle-fullscreen');
     const status = document.getElementById('deck-status');
     const totalSlides = slides.length;
@@ -1413,14 +1409,10 @@
         slide.setAttribute('aria-hidden', slideIndex === activeIndex ? 'false' : 'true');
       });
 
-      prevButton.disabled = activeIndex === 0;
-      nextButton.disabled = activeIndex === totalSlides - 1;
       status.textContent = `${activeIndex + 1} / ${totalSlides}`;
       document.title = `Slide ${activeIndex + 1}/${totalSlides} - Unit Testing & Code Coverage Analysis`;
     }
 
-    prevButton.addEventListener('click', () => renderSlide(activeIndex - 1));
-    nextButton.addEventListener('click', () => renderSlide(activeIndex + 1));
     fullscreenButton.addEventListener('click', toggleFullscreen);
 
     document.addEventListener('keydown', (event) => {
